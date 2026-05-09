@@ -119,3 +119,53 @@ yara -r /etc/yara/rules/webshells.yar /var/www/html/
 ## 3.3 — Scan with ALL rules at once
 
 yara -r /etc/yara/rules/*.yar /var/www/html/
+
+
+# Step 4 — Community Rulesets
+## What & Why?
+
+Instead of writing rules manually, the global security community maintains thousands of battle-tested rules covering real malware families, APT groups, ransomware, exploits etc. We download these for free.
+
+## 4.1 — Install Git (if not already)
+
+sudo apt install git -y
+git --version
+
+## 4.2 — Download Signature-Base by Neo23x0
+### Most trusted YARA ruleset in the world — maintained by Florian Roth (Principal Threat Researcher at Nextron Systems). Used by SOCs globally.
+
+cd /etc/yara/rules
+sudo git clone https://github.com/Neo23x0/signature-base.git
+
+### Check what was downloaded:
+
+ls /etc/yara/rules/signature-base/yara/ | head -20
+
+### Count total rule files:
+
+find /etc/yara/rules/signature-base/yara/ -name "*.yar" | wc -l
+
+## 4.3 — Download Elastic Security Rules
+### Used by Elastic/SIEM teams worldwide — covers APT groups & malware families
+
+sudo git clone https://github.com/elastic/protections-artifacts.git /etc/yara/rules/elastic-rules
+
+### Count rules:
+
+find /etc/yara/rules/elastic-rules/ -name "*.yar" | wc -l
+
+## 4.4 — Verify Overall Rules Structure
+
+ls -la /etc/yara/rules/
+
+## 4.5 - Test APT rules (using actual filenames)
+sudo yara -r /etc/yara/rules/signature-base/yara/apt_apt28.yar /tmp/
+sudo yara -r /etc/yara/rules/signature-base/yara/apt_apt29_nobelium_apr22.yar /home/
+
+## Rule Found — APT36 Operation Sindoor 
+### This is extremely relevant — APT36 is a Pakistani threat actor. Having this rule active means you're detecting threats specifically targeting Pakistani infrastructure. Very strong point for your PTA audit.
+
+sudo yara -r /etc/yara/rules/signature-base/yara/apt_apt36_operation_sindoor.yar /home/
+sudo yara -r /etc/yara/rules/signature-base/yara/apt_apt36_operation_sindoor.yar /tmp/
+sudo yara -r /etc/yara/rules/signature-base/yara/apt_apt36_operation_sindoor.yar /opt/
+
